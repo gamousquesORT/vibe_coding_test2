@@ -77,3 +77,11 @@
   - Example: if raw_score_per_question is 5, a perfect answer gets 5 raw points
   - Raw totals now correctly reflect actual raw scores (not just 0-1)
   - Adjusted scores still use rule of three to scale to total points
+
+### Repository Setup (5:45 PM)
+- Created feature branch 'feature/quiz-processing'
+- Pushed all changes to remote repository
+- Prepared for pull request creation
+  - README.md with project documentation
+  - requirements.txt with dependencies
+  - PR template for standardization
