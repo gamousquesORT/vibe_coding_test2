@@ -20,8 +20,7 @@ after every new test passes add changed files to git and commit
 
 **Commit message generation instructions**
 
-After modifing the code and any other asset provide short and context specific for generating commit messages
-
+After modifying the code and any other asset provide short and context specific for generating commit messages
 **Pull request title and description generation instructions**
 
 write a title with a short summary of the mayor changes to the solution
