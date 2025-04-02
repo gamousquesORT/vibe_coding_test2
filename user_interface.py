@@ -33,6 +33,56 @@ def get_total_points():
             print("Please enter a valid number for total points.")
 
 
+def confirm_inputs(quiz_name: str, raw_score: float, total_points: float) -> tuple:
+    """Allow user to confirm or modify input values.
+    
+    Returns:
+        tuple: (quiz_name, raw_score, total_points, confirmed)
+    """
+    while True:
+        print("\nPlease confirm your inputs:")
+        print(f"1. Quiz name: {quiz_name}")
+        print(f"2. Raw score per question: {raw_score}")
+        print(f"3. Total points: {total_points}")
+        print("\nWould you like to:")
+        print("1. Proceed with these values")
+        print("2. Change quiz name")
+        print("3. Change raw score per question")
+        print("4. Change total points")
+        
+        choice = input("\nEnter your choice (1-4): ").strip()
+        
+        if choice == "1":
+            return quiz_name, raw_score, total_points, True
+        elif choice == "2":
+            quiz_name = get_quiz_name()
+        elif choice == "3":
+            raw_score = get_raw_score_per_question()
+        elif choice == "4":
+            total_points = get_total_points()
+        else:
+            print("Invalid choice. Please enter a number between 1 and 4.")
+
+
+def get_user_inputs() -> tuple:
+    """Get all user inputs with confirmation.
+    
+    Returns:
+        tuple: (quiz_name, raw_score_per_question, total_points)
+    """
+    quiz_name = get_quiz_name()
+    raw_score = get_raw_score_per_question()
+    total_points = get_total_points()
+    
+    confirmed = False
+    while not confirmed:
+        quiz_name, raw_score, total_points, confirmed = confirm_inputs(
+            quiz_name, raw_score, total_points
+        )
+    
+    return quiz_name, raw_score, total_points
+
+
 def get_input_file():
     """Get the most recent Excel file from the input directory."""
     input_dir = Path('inputdata')

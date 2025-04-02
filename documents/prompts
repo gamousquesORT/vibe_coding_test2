@@ -86,3 +86,10 @@ you need to distinguish the total raw score of a question from the score the stu
 
 ----
 no, you are confused. the earned value for a question it is the score the student earned and is the value of the question score on the original sheet
+
+--- first version ok ---
+refactor the script so the user interaction code and the excel processing code are in different source code files
+---
+commit changes
+---
+
