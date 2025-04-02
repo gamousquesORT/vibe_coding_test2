@@ -108,10 +108,13 @@ class QuizProcessor:
         current_team = None
         
         for result in results:
+            # Show team info only for first student in team
+            is_first_in_team = result['Team Name'] != current_team
+            
             row = {
-                'Team Name': result['Team Name'] if result['Team Name'] != current_team else '',
-                'Team Raw Total': result['Team Raw Total'],
-                'Team Adjusted Total': result['Team Adjusted Total'],
+                'Team Name': result['Team Name'] if is_first_in_team else '',
+                'Team Raw Total': result['Team Raw Total'] if is_first_in_team else '',
+                'Team Adjusted Total': result['Team Adjusted Total'] if is_first_in_team else '',
                 'Student ID': result['Student ID'],
                 'Student Name': result['Student Name'],
                 'Email Address': result['Email Address'],
