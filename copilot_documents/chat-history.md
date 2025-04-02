@@ -100,3 +100,17 @@
   - Added ability to modify any input value
   - Improved user interface with numbered options
   - Process starts only after user confirms all values
+
+### Implementation Changes (6:45 PM)
+- Modified team name display in output Excel:
+  - Team name now appears only on first student row
+  - Empty string for subsequent team members
+  - Improved output readability by reducing repetition
+  - Maintained all score and student information
+
+### Implementation Changes (7:00 PM)
+- Enhanced Excel output format:
+  - Modified team totals display to show only on first row
+  - Team Raw Total and Team Adjusted Total now appear once per team
+  - Improved readability by removing redundant information
+  - Maintained all student and question score information
