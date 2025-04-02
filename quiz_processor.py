@@ -1,3 +1,4 @@
+"""Module for processing quiz data from Excel files."""
 import pandas as pd
 import re
 from pathlib import Path
@@ -10,13 +11,6 @@ def extract_question_numbers(columns):
         if match:
             question_numbers.add(int(match.group(1)))
     return sorted(list(question_numbers))
-
-def calculate_adjusted_score(raw_score, max_raw_score, total_points):
-    """Calculate adjusted score using rule of three."""
-    # Rule of three: if max_raw_score -> total_points, then raw_score -> x
-    if max_raw_score == 0:
-        return 0
-    return (raw_score * total_points) / max_raw_score
 
 def process_quiz_data(input_file, sheet_name, total_points, raw_score_per_question):
     """Process quiz data and calculate scores."""
@@ -54,7 +48,6 @@ def process_quiz_data(input_file, sheet_name, total_points, raw_score_per_questi
         # Process each student in the team
         for _, student in team_data.iterrows():
             # Calculate adjusted scores for individual questions
-            # For each question: if raw_score_per_question -> (total_points/num_questions), then earned_raw_score -> x
             points_per_question = total_points / len(question_numbers)
             adjusted_scores = [
                 (earned_score * points_per_question) / raw_score_per_question 
@@ -67,19 +60,18 @@ def process_quiz_data(input_file, sheet_name, total_points, raw_score_per_questi
                 'Student ID': student['Student ID'],
                 'Student Name': student['Student Name'],
                 'Email Address': student['Email Address'],
-                'Raw Scores': earned_raw_scores,  # Store raw scores from Excel
-                'Student Raw Total': team_raw_total,  # Use team total for student
+                'Raw Scores': earned_raw_scores,
+                'Student Raw Total': team_raw_total,
                 'Team Raw Total': team_raw_total,
                 'Team Adjusted Total': team_adjusted_total,
                 'Adjusted Scores': adjusted_scores,
-                'Student Adjusted Total': team_adjusted_total  # Same as team adjusted total
+                'Student Adjusted Total': team_adjusted_total
             })
     
     return results, question_numbers, max_possible_raw_total
 
 def create_output_excel(results, question_numbers, output_file):
     """Create the output Excel file with the processed data."""
-    # Prepare data for DataFrame
     output_data = []
     for result in results:
         row = {
@@ -103,71 +95,3 @@ def create_output_excel(results, question_numbers, output_file):
     # Create DataFrame and save to Excel
     df_output = pd.DataFrame(output_data)
     df_output.to_excel(output_file, index=False)
-
-def main():
-    print("\nQuiz Score Processing Tool")
-    print("-" * 30)
-    
-    # Get quiz information from user
-    quiz_name = input("\nEnter the quiz name: ").strip()
-    
-    while True:
-        try:
-            raw_score_per_question = float(input("Enter the total raw score possible per question: ").strip())
-            if raw_score_per_question <= 0:
-                print("Raw score must be greater than 0. Please try again.")
-                continue
-            break
-        except ValueError:
-            print("Please enter a valid number for raw score.")
-    
-    while True:
-        try:
-            total_points = float(input("Enter the total points for the quiz: ").strip())
-            if total_points <= 0:
-                print("Total points must be greater than 0. Please try again.")
-                continue
-            break
-        except ValueError:
-            print("Please enter a valid number for total points.")
-    
-    # Setup paths
-    input_dir = Path('inputdata')
-    output_dir = Path('outputdata')
-    output_dir.mkdir(exist_ok=True)
-    
-    # Find the most recent Excel file in the input directory
-    input_files = list(input_dir.glob('*.xlsx'))
-    if not input_files:
-        print("Error: No Excel files found in the input directory")
-        return
-    
-    input_file = max(input_files, key=lambda x: x.stat().st_mtime)
-    print(f"\nProcessing input file: {input_file.name}")
-    
-    output_file = output_dir / f"{quiz_name}.xlsx"
-    
-    try:
-        # Process the data
-        results, question_numbers, max_possible_raw_total = process_quiz_data(
-            input_file,
-            sheet_name='Team Analysis',
-            total_points=total_points,
-            raw_score_per_question=raw_score_per_question
-        )
-        
-        print(f"\nFound {len(question_numbers)} questions")
-        print(f"Raw score possible per question: {raw_score_per_question} points")
-        print(f"Maximum raw score possible: {max_possible_raw_total} points")
-        print(f"Total adjusted points: {total_points} points")
-        
-        # Generate output
-        create_output_excel(results, question_numbers, output_file)
-        print(f"\nProcessing complete. Output saved to {output_file}")
-        
-    except Exception as e:
-        print(f"\nError processing quiz data: {str(e)}")
-        return
-
-if __name__ == '__main__':
-    main()
