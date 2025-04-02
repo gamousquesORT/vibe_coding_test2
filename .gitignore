@@ -171,5 +171,7 @@ products_vectorstore/
 # Ignore any pickle files make during the course
 *.pkl
 
-#ingoer the data folder
-data/
+#ingestion  data folder
+inputdata/
+outputdata/
+
