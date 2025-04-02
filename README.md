@@ -5,7 +5,7 @@ The problem to solve involves grouping and converting the scores of students who
 
 My goal is not to write code, but to have the[ GitHub Copilot agent ](https://github.blog/news-insights/product-news/github-copilot-the-agent-awakens/)follow my instructions about what I want and eventually guide it on potential functional and technical improvements I’d like to make.
 
-As an extra task, I’m asking the agent to [write a log](copilot_documents\chat-history.md) of what I’m requesting. 
+As an extra task, I’m asking the agent to [write a log](.\copilot_documents\chat-history.md) of what I’m requesting. 
 
 # Quiz Score Processing Tool
 
