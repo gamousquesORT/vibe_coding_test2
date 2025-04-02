@@ -1,11 +1,66 @@
-This is a second [Vibe coding](https://en.wikipedia.org/wiki/Vibe_coding) experiment. It involves using a coding LLM / AI agent to develop an app by giving instructions about what we want it to build, allowing the agent to code, access the terminal, execute corrective actions, among other things, in order to build the app. In this project, I used the VS Code extension [GitHub Copilot Agent Mode](https://code.visualstudio.com/blogs/2025/02/24/introducing-copilot-agent-mode).
+# Quiz Score Processing Tool
 
-The problem to solve involves grouping and converting the scores of students who took a multiple-choice test with several attempts. There is an Excel spreadsheet containing information about the students and the team they belong to. Each question is worth 5 points, and points are deducted based on the number of attempts:
+A Python tool for processing team quiz scores and generating adjusted grade reports.
 
-First attempt, the question is worth 5 points
+## Features
 
-Second attempt, the question is worth 3 points
+- Process quiz scores from Excel files
+- Calculate raw and adjusted scores for team quizzes
+- Generate detailed Excel reports with:
+  - Team scores (raw and adjusted)
+  - Individual student information
+  - Question-by-question breakdown
+- Rule of three based score adjustment
+- User-friendly command line interface
 
-Third attempt, the question is worth 1 point
+## Setup
 
-Finally, it is necessary to map the team’s total score to the actual score value of the test.
+1. Create a virtual environment:
+```bash
+python -m venv venv
+```
+
+2. Activate the virtual environment:
+- Windows:
+```bash
+.\venv\Scripts\activate
+```
+- Unix/MacOS:
+```bash
+source venv/bin/activate
+```
+
+3. Install dependencies:
+```bash
+pip install pandas openpyxl
+```
+
+## Usage
+
+1. Place input Excel file in the `inputdata` folder
+2. Run the script:
+```bash
+python process_quiz.py
+```
+3. Follow the prompts to enter:
+   - Quiz name
+   - Raw score per question
+   - Total points for the quiz
+4. Find the output Excel file in the `outputdata` folder
+
+## Input File Format
+
+The input Excel file should have a "Team Analysis" sheet with the following columns:
+- Team: Team name
+- Student Name: Student's full name
+- Student ID: Student's identification number
+- Email Address: Student's email
+- Question scores: Columns named as "1_Score", "2_Score", etc.
+
+## Output Format
+
+The generated Excel file includes:
+- Team information
+- Student details
+- Raw and adjusted scores for each question
+- Total scores (both raw and adjusted)
