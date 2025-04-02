@@ -114,3 +114,10 @@
   - Maintained all other team and student data
   - Improved readability of team groupings in output
   - Added tracking of current team to handle repetition
+
+## April 2, 2025 7:00 PM
+- Enhanced Excel output format:
+  - Modified team totals to show only on first student row
+  - Team Raw Total and Team Adjusted Total now appear once per team
+  - Improved readability by eliminating duplicate values
+  - Consistent handling of all team-specific information
