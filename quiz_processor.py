@@ -105,9 +105,11 @@ class QuizProcessor:
     def create_output_excel(results: list, question_numbers: list, output_file: Path):
         """Create the output Excel file with the processed data."""
         output_data = []
+        current_team = None
+        
         for result in results:
             row = {
-                'Team Name': result['Team Name'],
+                'Team Name': result['Team Name'] if result['Team Name'] != current_team else '',
                 'Team Raw Total': result['Team Raw Total'],
                 'Team Adjusted Total': result['Team Adjusted Total'],
                 'Student ID': result['Student ID'],
@@ -116,6 +118,7 @@ class QuizProcessor:
                 'Student Raw Total': result['Student Raw Total'],
                 'Student Adjusted Total': result['Student Adjusted Total']
             }
+            current_team = result['Team Name']
             
             # Add individual question scores
             for i, (raw, adjusted) in enumerate(zip(result['Raw Scores'], result['Adjusted Scores']), 1):

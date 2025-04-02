@@ -107,3 +107,10 @@
   - Added `get_user_inputs` function to handle the complete input flow
   - Updated main.py to use new input confirmation system
   - Improved user experience with clear input review options
+
+## April 2, 2025 6:45 PM
+- Modified Excel output format:
+  - Changed team name display to show only on first student row
+  - Maintained all other team and student data
+  - Improved readability of team groupings in output
+  - Added tracking of current team to handle repetition
