@@ -91,3 +91,19 @@
   - Removed incorrect percentage calculation
   - Fixed rule of three calculations for both team and individual scores
   - Updated comments to reflect correct score handling
+
+## April 2, 2025 6:00 PM
+- Refactored code into separate modules:
+  - Created `quiz_processor.py` for Excel processing and score calculations
+  - Created `user_interface.py` for user interaction and input handling
+  - Created `main.py` as the application entry point
+  - Removed original `process_quiz.py`
+  - Improved code organization and maintainability
+  - Added proper docstrings and comments
+
+## April 2, 2025 6:15 PM
+- Added input confirmation system:
+  - Created `confirm_inputs` function for reviewing and modifying inputs
+  - Added `get_user_inputs` function to handle the complete input flow
+  - Updated main.py to use new input confirmation system
+  - Improved user experience with clear input review options
