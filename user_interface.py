@@ -159,13 +159,18 @@ def get_user_inputs() -> Optional[tuple]:
     return quiz_name, raw_score, total_points
 
 
-def get_input_file() -> Path:
-    """Get the most recent Excel file from the input directory."""
+def get_input_file() -> Optional[Path]:
+    """Get the most recent Excel file from the input directory.
+    Creates input directory if it doesn't exist.
+    """
     input_dir = Path('inputdata')
-    input_files = list(input_dir.glob('*.xlsx'))
+    input_dir.mkdir(exist_ok=True)
     
+    input_files = list(input_dir.glob('*.xlsx'))
     if not input_files:
-        raise FileNotFoundError("No Excel files found in the input directory")
+        print("\nNo Excel files found in the input directory.")
+        print(f"Please place your Excel files in: {input_dir.absolute()}")
+        return None
     
     return max(input_files, key=lambda x: x.stat().st_mtime)
 
@@ -304,22 +309,26 @@ def handle_score_editing(processor, teams: List[str], score_changes: list) -> Tu
         Tuple[bool, bool]: (should_exit_editing, should_exit_without_processing)
     """
     options = [
-        "Edit team scores",
-        "View changes", 
         "Proceed with processing",
+        "Edit team scores",
+        "View team scores",
+        "View changes", 
         "Exit without processing"
     ]
     choice = handle_menu(options, "Enter your choice")
     
     if choice == 0:
-        process_score_edit(processor, teams, score_changes)
-        return False, False
-    elif choice == 1:
-        display_score_changes(score_changes)
-        return False, False
-    elif choice == 2:
         display_score_changes(score_changes)
         return input("\nProceed with these changes? (y/n): ").strip().lower() == 'y', False
+    elif choice == 1:
+        process_score_edit(processor, teams, score_changes)
+        return False, False
+    elif choice == 2:
+        process_view_scores(processor, teams)
+        return False, False
+    elif choice == 3:
+        display_score_changes(score_changes)
+        return False, False
     else:
         print("\nExiting without processing...")
         return True, True
@@ -396,3 +405,37 @@ def display_score_changes(changes: List[ScoreChange]) -> None:
               f"changed from {change.old_score:.1f} to {change.new_score:.1f} "
               f"({change.difference:+.1f})")
     print("---------------------")
+
+
+def display_team_scores(processor, team_name: str) -> None:
+    """Display all scores for a specific team.
+    
+    Args:
+        processor: QuizProcessor instance
+        team_name: Name of the team to display scores for
+    """
+    team_data = processor.df[processor.df['Team'] == team_name]
+    if team_data.empty:
+        print(f"\nNo data found for team {team_name}")
+        return
+        
+    print(f"\nScores for team {team_name}:")
+    print("-" * 40)
+    
+    for q_num in processor.question_numbers:
+        score_col = f"{q_num}_Score"
+        score = float(team_data[score_col].iloc[0])
+        print(f"Question {q_num}: {score:.1f}/{processor.raw_score_per_question:.1f}")
+    print("-" * 40)
+
+
+def process_view_scores(processor, teams: List[str]) -> None:
+    """Process the view scores operation.
+    
+    Args:
+        processor: QuizProcessor instance
+        teams: List of team names
+    """
+    team_name = get_team_by_number(teams)
+    if team_name is not None:
+        display_team_scores(processor, team_name)

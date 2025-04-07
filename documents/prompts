@@ -4,7 +4,7 @@ I want to create a python script, using a virtual environment
 a big prompt
 On the inputdata folder there is an Excel file which contains in the "Team Analysis" sheet, the information form students that took a quizz.
 
-Each stundent belong to the team which name is in the value of the "Team" column.
+Each student belong to the team which name is in the value of the "Team" column.
 
 The student data which I need is in columns "StudentName", "Email Address" and "Student ID"
 
