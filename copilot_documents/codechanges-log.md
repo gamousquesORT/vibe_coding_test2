@@ -121,3 +121,21 @@
   - Team Raw Total and Team Adjusted Total now appear once per team
   - Improved readability by eliminating duplicate values
   - Consistent handling of all team-specific information
+
+[2025-04-07 14:00] Tested code execution
+- Ran main.py successfully
+- Processed input file with 12 questions
+- Generated output file q1.xlsx
+- Confirmed correct calculation of raw scores and scaling
+
+[2025-04-07 14:30] Added score editing functionality
+- Added edit_team_scores function to user_interface.py
+- Added score editing step in main.py before processing
+- Implemented score validation and error handling
+- Added user interface for team score modifications
+
+[2025-04-07 14:45] Added team number selection
+- Added display_team_list function to show numbered team list
+- Added get_team_by_number function for team selection by number
+- Updated edit_team_scores to use numbered team selection
+- Improved user experience with clearer team selection interface

@@ -119,3 +119,87 @@ def display_processing_results(num_questions, raw_score_per_question, max_raw_to
 def display_completion(output_file):
     """Display completion message."""
     print(f"\nProcessing complete. Output saved to {output_file}")
+
+
+def display_team_list(teams):
+    """Display numbered list of teams.
+    
+    Args:
+        teams: List of team names
+    """
+    print("\nAvailable Teams:")
+    for idx, team in enumerate(teams, 1):
+        print(f"{idx}. {team}")
+
+
+def get_team_by_number(teams):
+    """Get team name by selecting a number from the list.
+    
+    Args:
+        teams: List of team names
+    
+    Returns:
+        str: Selected team name or None if invalid selection
+    """
+    display_team_list(teams)
+    
+    try:
+        choice = int(input("\nEnter team number: ").strip())
+        if 1 <= choice <= len(teams):
+            return teams[choice - 1]
+        print(f"Please enter a number between 1 and {len(teams)}.")
+    except ValueError:
+        print("Please enter a valid number.")
+    return None
+
+
+def edit_team_scores(processor):
+    """Allow user to edit team scores before processing.
+    
+    Args:
+        processor: QuizProcessor instance with loaded data
+    """
+    teams = sorted(processor.df['Team'].unique())
+    
+    while True:
+        print("\nScore Editing Mode")
+        print("-----------------")
+        print("1. Edit team scores")
+        print("2. Proceed with processing")
+        
+        choice = input("\nEnter your choice (1-2): ").strip()
+        
+        if choice == "2":
+            break
+        elif choice == "1":
+            # Get team by number
+            team_name = get_team_by_number(teams)
+            if team_name is None:
+                continue
+            
+            # Get question number
+            try:
+                q_num = int(input("Enter question number: ").strip())
+                if q_num not in processor.question_numbers:
+                    print(f"Question {q_num} not found.")
+                    continue
+            except ValueError:
+                print("Please enter a valid question number.")
+                continue
+            
+            # Get new score
+            try:
+                new_score = float(input(f"Enter new raw score (0-{processor.raw_score_per_question}): ").strip())
+                if not 0 <= new_score <= processor.raw_score_per_question:
+                    print(f"Score must be between 0 and {processor.raw_score_per_question}.")
+                    continue
+            except ValueError:
+                print("Please enter a valid score.")
+                continue
+            
+            # Update score in dataframe
+            score_col = f"{q_num}_Score"
+            processor.df.loc[processor.df['Team'] == team_name, score_col] = new_score
+            print(f"\nUpdated score for team '{team_name}', question {q_num} to {new_score}")
+        else:
+            print("Invalid choice. Please enter 1 or 2.")
