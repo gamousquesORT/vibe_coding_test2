@@ -161,3 +161,71 @@
 - Added input validation details
 - Added exit options documentation
 - Updated setup instructions to use requirements.txt
+
+[2025-04-07 16:00] Added team score visualization
+- Added display_team_scores function to show current scores
+- Added process_view_scores function to handle team selection
+- Updated score editing menu with "View team scores" option
+- Added score display showing current/maximum score for each question
+- Enhanced user interface with clear score presentation
+
+[2025-04-07 16:15] Improved folder handling
+- Modified get_input_file to create input directory if missing
+- Added user-friendly message when no Excel files found
+- Changed error handling to return None instead of throwing exception
+- Updated main.py to gracefully handle missing input files
+- Added absolute path display in user message for clarity
+
+[2025-04-07 16:30] Test run verification
+- Successfully ran program with live data
+- Verified input file processing
+- Tested menu navigation and user input handling
+- Confirmed score editing interface works
+- Validated output file generation
+
+[2025-04-07 16:45] Standardized menu options
+- Moved "Proceed with processing" to first position in score editing menu
+- Updated handle_score_editing function to match new menu order
+- Maintained all existing functionality while improving consistency
+- Verified changes with error checking
+
+[2025-04-07 17:00] Test run with standardized menus
+- Verified consistent menu option placement
+- Successfully processed new quiz with test data
+- Confirmed proper menu flow and navigation
+- Generated output file r1.xlsx correctly
+- Validated all user input handling
+
+[2025-04-07 17:15] Committed changes
+- Created commit on feat_visualize_teams_scores branch
+- Included team score visualization feature
+- Added menu standardization changes
+- Updated input/output folder handling
+- Added documentation updates
+- Verified all changes with successful test runs
+
+[2025-04-07 17:30] Major code refactoring
+- Extracted FileHandler class for file operations
+- Created MenuHandler class for menu and display logic
+- Added QuizInputHandler class for quiz parameter management
+- Implemented ScoreEditor class for score editing operations
+- Updated main.py to use new class structure
+- Removed duplicate standalone functions
+- Verified no errors in refactored code
+
+[2025-04-07 17:45] Separated UI modules
+- Created ui package with separate modules for each class
+- Moved input validation to input_validator.py
+- Created score_change.py for ScoreChange dataclass
+- Moved file operations to file_handler.py
+- Created menu_handler.py for menu operations
+- Moved quiz input handling to quiz_input_handler.py
+- Created score_editor.py for score editing operations
+- Verified all functionality working with test run
+
+[2025-04-07 18:00] Created Pull Request
+- Added comprehensive PR description
+- Documented all major changes and design decisions
+- Listed completed test verifications
+- Pushed all changes to remote repository
+- Branch ready for code review
