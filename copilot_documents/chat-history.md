@@ -114,3 +114,38 @@
   - Team Raw Total and Team Adjusted Total now appear once per team
   - Improved readability by removing redundant information
   - Maintained all student and question score information
+
+## April 7, 2025
+
+[2025-04-07 14:00] 
+Q: can you run the code to test if it works
+A: Ran main.py successfully. The script:
+- Processed input file with 12 questions
+- Accepted quiz parameters (name: q1, raw score per question: 5, total points: 1.5)
+- Generated output file q1.xlsx
+- Confirmed correct calculation of raw and adjusted scores
+
+[2025-04-07 14:30] 
+Q: after the user inputs and confirmation, and before processing the scores. i want to enter a loop in which the user can input a Team name and input a new raw score for a question. After asking the user to finish changing raw scores ask to proced and process scores
+A: Added score editing functionality:
+- Added score editing loop between input confirmation and score processing
+- User can edit raw scores for specific teams and questions
+- Implemented validation for team names, question numbers, and scores
+- Added option to proceed with processing after editing is complete
+
+[2025-04-07 14:45] 
+Q: refactor so the user can type only the number of the team instead of the complete name
+A: Added team number selection functionality:
+- Teams are now displayed as a numbered list
+- User can select team by entering its number (1-N)
+- Added input validation for team number selection
+- Test confirmed working with sample quiz q3
+
+[2025-04-07 15:00] 
+Q: make it easy for the user to keep track of the grade changes before proceding with the processing
+A: Enhanced score editing with change tracking:
+- Added running summary of all score changes
+- Added option to view changes at any time
+- Shows score differences with +/- indicators
+- Added final confirmation step with change summary
+- Added tracking of original scores for comparison

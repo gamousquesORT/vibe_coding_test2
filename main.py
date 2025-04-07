@@ -6,7 +6,8 @@ from user_interface import (
     get_output_file,
     display_processing_start,
     display_processing_results,
-    display_completion
+    display_completion,
+    edit_team_scores
 )
 
 
@@ -20,14 +21,18 @@ def main():
         # Get user inputs with confirmation
         quiz_name, raw_score_per_question, total_points = get_user_inputs()
         
-        # Initialize and process data
+        # Initialize processor
         processor = QuizProcessor(
             input_file=input_file,
             sheet_name='Team Analysis',
             total_points=total_points,
             raw_score_per_question=raw_score_per_question
         )
+
+        # Allow score editing before processing
+        edit_team_scores(processor)
         
+        # Process data
         results, question_numbers, max_possible_raw_total = processor.process_data()
         
         # Display results
