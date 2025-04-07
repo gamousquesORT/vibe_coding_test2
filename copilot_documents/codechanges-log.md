@@ -139,3 +139,10 @@
 - Added get_team_by_number function for team selection by number
 - Updated edit_team_scores to use numbered team selection
 - Improved user experience with clearer team selection interface
+
+[2025-04-07 15:00] Added score change tracking
+- Added display_score_changes function to show summary of changes
+- Enhanced edit_team_scores with change tracking
+- Added view changes option in editing menu
+- Added confirmation step with changes summary
+- Added score difference indicators (+/-) in summary

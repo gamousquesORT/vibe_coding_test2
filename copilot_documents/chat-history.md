@@ -140,3 +140,12 @@ A: Added team number selection functionality:
 - User can select team by entering its number (1-N)
 - Added input validation for team number selection
 - Test confirmed working with sample quiz q3
+
+[2025-04-07 15:00] 
+Q: make it easy for the user to keep track of the grade changes before proceding with the processing
+A: Enhanced score editing with change tracking:
+- Added running summary of all score changes
+- Added option to view changes at any time
+- Shows score differences with +/- indicators
+- Added final confirmation step with change summary
+- Added tracking of original scores for comparison

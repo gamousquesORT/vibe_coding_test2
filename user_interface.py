@@ -153,6 +153,23 @@ def get_team_by_number(teams):
     return None
 
 
+def display_score_changes(changes):
+    """Display summary of all score changes made.
+    
+    Args:
+        changes: List of tuples (team_name, question_number, old_score, new_score)
+    """
+    if not changes:
+        print("\nNo score changes made.")
+        return
+        
+    print("\nScore Changes Summary:")
+    print("---------------------")
+    for team, q_num, old, new in changes:
+        print(f"Team {team}: Question {q_num} changed from {old:.1f} to {new:.1f} ({new-old:+.1f})")
+    print("---------------------")
+
+
 def edit_team_scores(processor):
     """Allow user to edit team scores before processing.
     
@@ -160,17 +177,25 @@ def edit_team_scores(processor):
         processor: QuizProcessor instance with loaded data
     """
     teams = sorted(processor.df['Team'].unique())
+    score_changes = []
     
     while True:
         print("\nScore Editing Mode")
         print("-----------------")
         print("1. Edit team scores")
-        print("2. Proceed with processing")
+        print("2. View changes")
+        print("3. Proceed with processing")
         
-        choice = input("\nEnter your choice (1-2): ").strip()
+        choice = input("\nEnter your choice (1-3): ").strip()
         
-        if choice == "2":
-            break
+        if choice == "3":
+            # Show final summary before proceeding
+            display_score_changes(score_changes)
+            confirm = input("\nProceed with these changes? (y/n): ").strip().lower()
+            if confirm == 'y':
+                break
+        elif choice == "2":
+            display_score_changes(score_changes)
         elif choice == "1":
             # Get team by number
             team_name = get_team_by_number(teams)
@@ -188,6 +213,9 @@ def edit_team_scores(processor):
                 continue
             
             # Get new score
+            score_col = f"{q_num}_Score"
+            old_score = float(processor.df.loc[processor.df['Team'] == team_name, score_col].iloc[0])
+            
             try:
                 new_score = float(input(f"Enter new raw score (0-{processor.raw_score_per_question}): ").strip())
                 if not 0 <= new_score <= processor.raw_score_per_question:
@@ -198,8 +226,8 @@ def edit_team_scores(processor):
                 continue
             
             # Update score in dataframe
-            score_col = f"{q_num}_Score"
             processor.df.loc[processor.df['Team'] == team_name, score_col] = new_score
-            print(f"\nUpdated score for team '{team_name}', question {q_num} to {new_score}")
+            score_changes.append((team_name, q_num, old_score, new_score))
+            print(f"\nUpdated score for team '{team_name}', question {q_num} from {old_score:.1f} to {new_score:.1f}")
         else:
-            print("Invalid choice. Please enter 1 or 2.")
+            print("Invalid choice. Please enter 1, 2, or 3.")
