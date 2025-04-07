@@ -19,7 +19,11 @@ def main():
         display_processing_start(input_file)
         
         # Get user inputs with confirmation
-        quiz_name, raw_score_per_question, total_points = get_user_inputs()
+        inputs = get_user_inputs()
+        if inputs is None:
+            return
+            
+        quiz_name, raw_score_per_question, total_points = inputs
         
         # Initialize processor
         processor = QuizProcessor(
@@ -30,7 +34,9 @@ def main():
         )
 
         # Allow score editing before processing
-        edit_team_scores(processor)
+        if not edit_team_scores(processor):
+            print("\nExiting without processing...")
+            return
         
         # Process data
         results, question_numbers, max_possible_raw_total = processor.process_data()

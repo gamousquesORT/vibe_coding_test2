@@ -146,3 +146,18 @@
 - Added view changes option in editing menu
 - Added confirmation step with changes summary
 - Added score difference indicators (+/-) in summary
+
+[2025-04-07 15:30] Added exit options to all user input loops
+- Added "Exit without processing" option to initial input confirmation
+- Added exit option to score editing menu
+- Updated return types to handle early exits
+- Added clean exit paths throughout the application
+- Added change summary display before exiting from editing
+
+[2025-04-07 15:45] Updated README documentation
+- Added score editing capabilities section
+- Added detailed feature descriptions
+- Updated usage instructions with new steps
+- Added input validation details
+- Added exit options documentation
+- Updated setup instructions to use requirements.txt

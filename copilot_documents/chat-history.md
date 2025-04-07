@@ -149,3 +149,22 @@ A: Enhanced score editing with change tracking:
 - Shows score differences with +/- indicators
 - Added final confirmation step with change summary
 - Added tracking of original scores for comparison
+
+[2025-04-07 15:30] 
+Q: add to every user input loop an end without processing option
+A: Added exit options to all user input stages:
+- Added "Exit without processing" to initial input confirmation
+- Added exit option to score editing menu
+- Added change summary display before exiting
+- Implemented clean exit paths throughout
+- Tested functionality with sample quiz q8
+
+[2025-04-07 15:45] 
+Q: update the readme.md file to include the new features of the app
+A: Updated README.md with comprehensive feature documentation:
+- Added score editing capabilities section
+- Added detailed feature descriptions
+- Updated usage instructions with new steps
+- Added input validation section
+- Added exit options documentation
+- Updated setup instructions to use requirements.txt
