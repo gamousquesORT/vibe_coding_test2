@@ -1,1 +1,8 @@
-create datainput and dataout folders if not present
+user_interface.py:187
+
+The call to cls.confirm_inputs is passing extra parameters that do not match its defined signature. Please remove the additional 'confirmed, should_exit =' portion so that only quiz_name, raw_score, and total_points are passed.
+
+--
+A ScoreEditor class is defined here while an almost identical implementation exists in ui/score_editor.py. To avoid duplication and potential maintenance issues, remove the redundant definition from user_interface.py.
+
+--
