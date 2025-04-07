@@ -195,3 +195,30 @@
 - Confirmed proper menu flow and navigation
 - Generated output file r1.xlsx correctly
 - Validated all user input handling
+
+[2025-04-07 17:15] Committed changes
+- Created commit on feat_visualize_teams_scores branch
+- Included team score visualization feature
+- Added menu standardization changes
+- Updated input/output folder handling
+- Added documentation updates
+- Verified all changes with successful test runs
+
+[2025-04-07 17:30] Major code refactoring
+- Extracted FileHandler class for file operations
+- Created MenuHandler class for menu and display logic
+- Added QuizInputHandler class for quiz parameter management
+- Implemented ScoreEditor class for score editing operations
+- Updated main.py to use new class structure
+- Removed duplicate standalone functions
+- Verified no errors in refactored code
+
+[2025-04-07 17:45] Separated UI modules
+- Created ui package with separate modules for each class
+- Moved input validation to input_validator.py
+- Created score_change.py for ScoreChange dataclass
+- Moved file operations to file_handler.py
+- Created menu_handler.py for menu operations
+- Moved quiz input handling to quiz_input_handler.py
+- Created score_editor.py for score editing operations
+- Verified all functionality working with test run
