@@ -270,3 +270,33 @@ A: Refactored user_interface.py to remove duplication:
   - Input validation
   - Menu navigation
   - File operations
+
+[2025-04-08 14:30] 
+Q: one the output file highlight the cells with the scores that were changed
+A: Added score highlighting feature:
+- Added yellow highlighting for changed scores in Excel output
+- Both raw and adjusted scores are highlighted when changed
+- Score changes are tracked and preserved through processing
+- Modified QuizProcessor to handle cell formatting
+- Updated ScoreEditor to record changes in processor
+- Test confirmed highlighting working correctly
+
+[2025-04-08 15:00] 
+Q: check if program works before commiting
+A: Tested the refactored code with score highlighting:
+- Successfully ran program with test data
+- Made changes to Team 4 (Q8, Q9) and Team 5 (Q9) scores
+- Verified yellow highlighting applied correctly in output file
+- Confirmed all functionality working:
+  - Score editing
+  - Change tracking
+  - Excel highlighting
+  - Input validation
+
+[2025-04-08 15:30] 
+Q: mark the highlighted cells for all students on the team, no just for the first one
+A: Fixed score highlighting to work for all team members:
+- Added team name tracking in _highlight_changed_scores
+- Applied highlighting to all students within each team
+- Fixed issue with empty team name rows
+- Tested with multiple teams and verified changes
