@@ -242,3 +242,19 @@
 - Added new view scores feature
 - Updated user_interface.py to use new modules
 - Improved code organization and reduced duplication
+
+[2025-04-08 14:30] Added score highlighting in output Excel
+- Added score change tracking in QuizProcessor
+- Modified Excel output to highlight changed scores
+- Added yellow highlighting for modified raw and adjusted scores
+- Updated score editor to record changes in processor
+- Improved Excel writer to handle cell formatting
+
+[2025-04-08 15:00] Added score highlighting in Excel output
+- Added highlighting for changed scores in output Excel
+- Refactored QuizProcessor for better code organization
+- Split Excel output logic into focused methods
+- Added proper type hints throughout
+- Updated dependencies in requirements.txt
+- Improved error handling in file operations
+- Tested functionality with sample quiz data

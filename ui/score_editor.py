@@ -144,4 +144,7 @@ class ScoreEditor:
         while True:
             should_exit, should_exit_without_processing = self.handle_score_editing()
             if should_exit:
+                if not should_exit_without_processing:
+                    # Record changes in processor before processing
+                    self.processor.record_score_changes(self.score_changes)
                 return not should_exit_without_processing
