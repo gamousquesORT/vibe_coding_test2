@@ -292,3 +292,11 @@ A: Tested the refactored code with score highlighting:
   - Change tracking
   - Excel highlighting
   - Input validation
+
+[2025-04-08 15:30] 
+Q: mark the highlighted cells for all students on the team, no just for the first one
+A: Fixed score highlighting to work for all team members:
+- Added team name tracking in _highlight_changed_scores
+- Applied highlighting to all students within each team
+- Fixed issue with empty team name rows
+- Tested with multiple teams and verified changes

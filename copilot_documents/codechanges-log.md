@@ -258,3 +258,10 @@
 - Updated dependencies in requirements.txt
 - Improved error handling in file operations
 - Tested functionality with sample quiz data
+
+[2025-04-08 15:30] Fixed score highlighting for team members
+- Modified _highlight_changed_scores to track current team
+- Ensured highlighting applies to all team members
+- Fixed team name tracking for empty rows
+- Removed unnecessary parameter from save_to_excel
+- Tested with multiple teams and verified highlighting
