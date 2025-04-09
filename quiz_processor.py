@@ -1,10 +1,12 @@
 """Module for processing quiz data from Excel files."""
+from __future__ import annotations
 import pandas as pd
 import re
 from pathlib import Path
 from openpyxl.styles import PatternFill
-from typing import List, Dict, Set, Tuple, Optional
+from typing import List, Dict, Set, Tuple
 from ui.score_change import ScoreChange
+
 
 class QuizProcessor:
     """Class for processing quiz data from Excel files."""
@@ -31,14 +33,13 @@ class QuizProcessor:
     
     def _extract_question_numbers(self) -> List[int]:
         """Extract unique question numbers from column names."""
-        question_numbers = set()
-        for col in self.df.columns:
-            match = re.match(r'(\d+)_score', col.lower())
-            if match:
-                question_numbers.add(int(match.group(1)))
-        return sorted(list(question_numbers))
+        return sorted([
+            int(match.group(1))
+            for col in self.df.columns
+            if (match := re.match(r'(\d+)_score', col.lower()))
+        ])
 
-    def record_score_changes(self, changes: List['ScoreChange']) -> None:
+    def record_score_changes(self, changes: List[ScoreChange]) -> None:
         """Record which scores were changed for highlighting."""
         self.changed_scores = {}
         for change in changes:
@@ -46,16 +47,14 @@ class QuizProcessor:
                 self.changed_scores[change.team_name] = set()
             self.changed_scores[change.team_name].add(change.question_number)
     
-    def _get_team_scores(self, team_data) -> Tuple[List[float], float, float]:
+    def _get_team_scores(self, team_data: pd.DataFrame) -> Tuple[List[float], float, float]:
         """Calculate team scores from the first student's data."""
         first_student = team_data.iloc[0]
-        earned_raw_scores = []
-        
-        for q_num in self.question_numbers:
-            score_col = f"{q_num}_Score"
-            if score_col in self.df.columns:
-                earned_raw_score = float(first_student[score_col])
-                earned_raw_scores.append(earned_raw_score)
+        earned_raw_scores = [
+            float(first_student[f"{q_num}_Score"])
+            for q_num in self.question_numbers
+            if f"{q_num}_Score" in self.df.columns
+        ]
         
         team_raw_total = sum(earned_raw_scores)
         team_adjusted_total = (team_raw_total * self.total_points) / self.max_possible_raw_total
@@ -94,6 +93,20 @@ class QuizProcessor:
         
         return results, self.question_numbers, self.max_possible_raw_total
 
+    def _get_score_column_indices(self, df: pd.DataFrame) -> Tuple[Dict[int, int], Dict[int, int]]:
+        """Get column indices for raw and adjusted score columns."""
+        raw_score_cols = {
+            q: next(i for i, col in enumerate(df.columns, 1) 
+                   if col == f'Q{q} Raw Score')
+            for q in self.question_numbers
+        }
+        adjusted_score_cols = {
+            q: next(i for i, col in enumerate(df.columns, 1) 
+                   if col == f'Q{q} Adjusted Score')
+            for q in self.question_numbers
+        }
+        return raw_score_cols, adjusted_score_cols
+    
     def _create_output_dataframe(self, results: List[Dict]) -> pd.DataFrame:
         """Create DataFrame for output."""
         output_data = []
@@ -101,7 +114,6 @@ class QuizProcessor:
         
         for result in results:
             is_first_in_team = result['Team Name'] != current_team
-            
             row = {
                 'Team Name': result['Team Name'] if is_first_in_team else '',
                 'Team Raw Total': result['Team Raw Total'] if is_first_in_team else '',
@@ -121,20 +133,6 @@ class QuizProcessor:
             output_data.append(row)
         
         return pd.DataFrame(output_data)
-
-    def _get_score_column_indices(self, df: pd.DataFrame) -> Tuple[Dict[int, int], Dict[int, int]]:
-        """Get column indices for raw and adjusted score columns."""
-        raw_score_cols = {
-            q: next(i for i, col in enumerate(df.columns, 1) 
-                   if col == f'Q{q} Raw Score')
-            for q in self.question_numbers
-        }
-        adjusted_score_cols = {
-            q: next(i for i, col in enumerate(df.columns, 1) 
-                   if col == f'Q{q} Adjusted Score')
-            for q in self.question_numbers
-        }
-        return raw_score_cols, adjusted_score_cols    
     
     def _highlight_changed_scores(self, worksheet, df: pd.DataFrame) -> None:
         """Apply highlighting to changed scores in worksheet."""
@@ -142,15 +140,12 @@ class QuizProcessor:
             return
             
         raw_score_cols, adjusted_score_cols = self._get_score_column_indices(df)
-        
-        # Track current team for empty team name rows
         current_team = None
+        
         for row_idx, row in enumerate(df.to_dict('records'), 2):
-            # Update current team when we find a non-empty team name
             if row['Team Name']:
                 current_team = row['Team Name']
             
-            # Use current team name for highlighting all members
             if current_team in self.changed_scores:
                 for q_num in self.changed_scores[current_team]:
                     for col_idx in [raw_score_cols[q_num], adjusted_score_cols[q_num]]:
@@ -167,10 +162,9 @@ class QuizProcessor:
 
     @classmethod
     def create_output_excel(cls, results: List[Dict], question_numbers: List[int], 
-                          output_file: Path, processor: Optional['QuizProcessor'] = None) -> None:
+                          output_file: Path, processor: QuizProcessor | None = None) -> None:
         """Create the output Excel file with the processed data."""
         if processor:
             processor.save_to_excel(results, output_file)
         else:
-            df_output = cls._create_output_dataframe(results)
-            df_output.to_excel(output_file, index=False)
+            pd.DataFrame(results).to_excel(output_file, index=False)

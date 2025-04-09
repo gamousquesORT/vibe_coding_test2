@@ -2,26 +2,37 @@
 import streamlit as st
 from pathlib import Path
 import pandas as pd
-import os
-import sys
 
 # Add project root to Python path
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if ROOT_DIR not in sys.path:
-    sys.path.insert(0, ROOT_DIR)
+import sys
+sys.path.append(str(Path(__file__).parent.parent))
 
 from quiz_processor import QuizProcessor
 from ui.score_change import ScoreChange
 
 
-def initialize_session_state():
+def initialize_session_state() -> None:
     """Initialize Streamlit session state variables."""
-    if 'processor' not in st.session_state:
-        st.session_state.processor = None
-    if 'score_changes' not in st.session_state:
-        st.session_state.score_changes = []
-    if 'current_team' not in st.session_state:
-        st.session_state.current_team = None
+    defaults = {
+        'processor': None,
+        'score_changes': [],
+        'current_team': None
+    }
+    for key, value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+
+def create_score_table(processor: QuizProcessor, team_data: pd.DataFrame) -> pd.DataFrame:
+    """Create a table of scores for display."""
+    return pd.DataFrame([
+        {
+            "Question": f"Question {q_num}",
+            "Current Score": f"{float(team_data[f'{q_num}_Score'].iloc[0]):.1f}",
+            "Maximum Score": f"{processor.raw_score_per_question:.1f}"
+        }
+        for q_num in processor.question_numbers
+    ])
 
 
 def display_team_scores(processor: QuizProcessor, team_name: str) -> None:
@@ -32,22 +43,40 @@ def display_team_scores(processor: QuizProcessor, team_name: str) -> None:
         return
 
     st.subheader(f"Scores for {team_name}")
-    
-    # Create score table
-    scores_data = []
-    for q_num in processor.question_numbers:
-        score_col = f"{q_num}_Score"
-        score = float(team_data[score_col].iloc[0])
-        scores_data.append({
-            "Question": f"Question {q_num}",
-            "Current Score": f"{score:.1f}",
-            "Maximum Score": f"{processor.raw_score_per_question:.1f}"
-        })
-    
-    st.table(pd.DataFrame(scores_data))
+    st.table(create_score_table(processor, team_data))
 
 
-def edit_team_scores(processor: QuizProcessor):
+def create_changes_table(changes: list[ScoreChange]) -> pd.DataFrame:
+    """Create a table summarizing score changes."""
+    if not changes:
+        return None
+        
+    return pd.DataFrame([
+        {
+            "Team": change.team_name,
+            "Question": f"Q{change.question_number}",
+            "From": f"{change.old_score:.1f}",
+            "To": f"{change.new_score:.1f}",
+            "Change": f"{change.difference:+.1f}"
+        }
+        for change in changes
+    ])
+
+
+def handle_score_update(processor: QuizProcessor, team_name: str, 
+                       question_number: int, new_score: float) -> None:
+    """Handle updating a team's score."""
+    score_col = f"{question_number}_Score"
+    current_score = float(processor.df.loc[processor.df['Team'] == team_name, score_col].iloc[0])
+    
+    if new_score != current_score:
+        change = ScoreChange(team_name, question_number, current_score, new_score)
+        processor.df.loc[processor.df['Team'] == team_name, score_col] = new_score
+        st.session_state.score_changes.append(change)
+        st.success(f"Updated score from {current_score:.1f} to {new_score:.1f}")
+
+
+def edit_team_scores(processor: QuizProcessor) -> None:
     """Edit team scores interface."""
     teams = sorted(processor.df['Team'].unique())
     
@@ -55,21 +84,17 @@ def edit_team_scores(processor: QuizProcessor):
     
     with col1:
         st.subheader("Select Team")
-        team_name = st.selectbox(
-            "Choose a team:",
-            teams,
-            index=teams.index(st.session_state.current_team) if st.session_state.current_team in teams else 0
-        )
+        team_idx = teams.index(st.session_state.current_team) if st.session_state.current_team in teams else 0
+        team_name = st.selectbox("Choose a team:", teams, index=team_idx)
         st.session_state.current_team = team_name
         
         st.subheader("Edit Score")
-        question_number = st.selectbox(
-            "Choose question number:",
-            processor.question_numbers
-        )
+        question_number = st.selectbox("Choose question number:", processor.question_numbers)
         
-        score_col = f"{question_number}_Score"
-        current_score = float(processor.df.loc[processor.df['Team'] == team_name, score_col].iloc[0])
+        current_score = float(processor.df.loc[
+            processor.df['Team'] == team_name, 
+            f"{question_number}_Score"
+        ].iloc[0])
         
         new_score = st.number_input(
             "Enter new score:",
@@ -80,31 +105,19 @@ def edit_team_scores(processor: QuizProcessor):
         )
         
         if st.button("Update Score"):
-            if new_score != current_score:
-                change = ScoreChange(team_name, question_number, current_score, new_score)
-                processor.df.loc[processor.df['Team'] == team_name, score_col] = new_score
-                st.session_state.score_changes.append(change)
-                st.success(f"Updated score from {current_score:.1f} to {new_score:.1f}")
+            handle_score_update(processor, team_name, question_number, new_score)
     
     with col2:
         display_team_scores(processor, team_name)
         
-        if st.session_state.score_changes:
+        changes_table = create_changes_table(st.session_state.score_changes)
+        if changes_table is not None:
             st.subheader("Score Changes Summary")
-            changes_data = []
-            for change in st.session_state.score_changes:
-                changes_data.append({
-                    "Team": change.team_name,
-                    "Question": f"Q{change.question_number}",
-                    "From": f"{change.old_score:.1f}",
-                    "To": f"{change.new_score:.1f}",
-                    "Change": f"{change.difference:+.1f}"
-                })
-            st.table(pd.DataFrame(changes_data))
+            st.table(changes_table)
 
 
-def process_quiz(processor: QuizProcessor, quiz_name: str):
-    """Process quiz and generate output."""
+def save_and_process_file(processor: QuizProcessor, quiz_name: str) -> Path:
+    """Save and process quiz data."""
     results, question_numbers, max_raw_total = processor.process_data()
     
     st.subheader("Processing Results")
@@ -117,11 +130,16 @@ def process_quiz(processor: QuizProcessor, quiz_name: str):
     output_file = Path("outputdata") / f"{quiz_name}.xlsx"
     output_file.parent.mkdir(exist_ok=True)
     
-    # Record changes in processor if any exist
     if st.session_state.score_changes:
         processor.record_score_changes(st.session_state.score_changes)
     
     QuizProcessor.create_output_excel(results, question_numbers, output_file, processor)
+    return output_file
+
+
+def process_quiz(processor: QuizProcessor, quiz_name: str) -> None:
+    """Process quiz and generate output."""
+    output_file = save_and_process_file(processor, quiz_name)
     
     # Provide download link
     with open(output_file, "rb") as file:
@@ -133,7 +151,47 @@ def process_quiz(processor: QuizProcessor, quiz_name: str):
         )
 
 
-def main():
+def setup_quiz_parameters() -> tuple[str, float, float]:
+    """Set up quiz parameters through user input."""
+    st.subheader("Quiz Parameters")
+    quiz_name = st.text_input("Quiz Name", help="Enter a name for the quiz")
+    raw_score = st.number_input(
+        "Raw Score per Question",
+        min_value=0.1,
+        value=5.0,
+        help="Maximum points possible for each question"
+    )
+    total_points = st.number_input(
+        "Total Points",
+        min_value=0.1,
+        value=1.5,
+        help="Total points for the entire quiz"
+    )
+    return quiz_name, raw_score, total_points
+
+
+def handle_file_upload() -> tuple[Path, str]:
+    """Handle file upload and saving."""
+    st.subheader("Upload Quiz File")
+    uploaded_file = st.file_uploader(
+        "Choose Excel file",
+        type="xlsx",
+        help="Select the Excel file containing quiz data"
+    )
+    
+    if uploaded_file:
+        input_dir = Path("inputdata")
+        input_dir.mkdir(exist_ok=True)
+        input_path = input_dir / uploaded_file.name
+        
+        with open(input_path, "wb") as f:
+            f.write(uploaded_file.getvalue())
+            
+        return input_path, uploaded_file.name
+    return None, None
+
+
+def main() -> None:
     """Main Streamlit application."""
     st.set_page_config(
         page_title="Quiz Score Processor",
@@ -146,44 +204,17 @@ def main():
     
     initialize_session_state()
     
-    # File upload and initial setup
+    # File upload and parameter setup
     upload_col, params_col = st.columns(2)
     
     with upload_col:
-        st.subheader("Upload Quiz File")
-        uploaded_file = st.file_uploader(
-            "Choose Excel file",
-            type="xlsx",
-            help="Select the Excel file containing quiz data"
-        )
+        input_path, _ = handle_file_upload()
     
     with params_col:
-        st.subheader("Quiz Parameters")
-        quiz_name = st.text_input("Quiz Name", help="Enter a name for the quiz")
-        raw_score = st.number_input(
-            "Raw Score per Question",
-            min_value=0.1,
-            value=5.0,
-            help="Maximum points possible for each question"
-        )
-        total_points = st.number_input(
-            "Total Points",
-            min_value=0.1,
-            value=1.5,
-            help="Total points for the entire quiz"
-        )
+        quiz_name, raw_score, total_points = setup_quiz_parameters()
     
     # Process uploaded file
-    if uploaded_file:
-        # Save uploaded file
-        input_dir = Path("inputdata")
-        input_dir.mkdir(exist_ok=True)
-        input_path = input_dir / uploaded_file.name
-        
-        with open(input_path, "wb") as f:
-            f.write(uploaded_file.getvalue())
-        
-        # Initialize processor
+    if input_path:
         st.session_state.processor = QuizProcessor(
             input_file=input_path,
             sheet_name='Team Analysis',
