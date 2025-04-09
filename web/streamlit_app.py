@@ -3,6 +3,8 @@ import streamlit as st
 from pathlib import Path
 import pandas as pd
 import streamlit.components.v1 as components
+from streamlit.runtime.scriptrunner import add_script_run_ctx
+import subprocess
 
 # Add project root to Python path
 import sys
@@ -85,12 +87,12 @@ def save_score_changes(processor: QuizProcessor) -> None:
     st.success(f"Changes saved to {save_path}")
 
 
-def create_score_table(processor: QuizProcessor, team_data: pd.DataFrame) -> pd.DataFrame:
+def create_score_table(processor: QuizProcessor, team_data: pd.DataFrame, team_name: str) -> pd.DataFrame:
     """Create a table of scores for display."""
     return pd.DataFrame([
         {
             "Question": f"Question {q_num}",
-            "Current Score": f"{float(team_data[f'{q_num}_Score'].iloc[0]):.1f}",
+            "Current Score": f"{st.session_state.get(f'score_{team_name}_{q_num}', float(team_data[f'{q_num}_Score'].iloc[0])):.1f}",
             "Maximum Score": f"{processor.raw_score_per_question:.1f}"
         }
         for q_num in processor.question_numbers
@@ -105,7 +107,7 @@ def display_team_scores(processor: QuizProcessor, team_name: str) -> None:
         return
 
     st.subheader(f"Scores for {team_name}")
-    st.table(create_score_table(processor, team_data))
+    st.table(create_score_table(processor, team_data, team_name))
 
 
 def create_changes_table(changes: list[ScoreChange]) -> pd.DataFrame:
@@ -135,6 +137,8 @@ def handle_score_update(processor: QuizProcessor, team_name: str,
         change = ScoreChange(team_name, question_number, current_score, new_score)
         processor.df.loc[processor.df['Team'] == team_name, score_col] = new_score
         st.session_state.score_changes.append(change)
+        # Force refresh of the score display by updating session state
+        st.session_state[f"score_{team_name}_{question_number}"] = new_score
         st.success(f"Updated score from {current_score:.1f} to {new_score:.1f}")
 
 
@@ -147,23 +151,43 @@ def edit_team_scores(processor: QuizProcessor) -> None:
     with col1:
         st.subheader("Select Team")
         team_idx = teams.index(st.session_state.current_team) if st.session_state.current_team in teams else 0
-        team_name = st.selectbox("Choose a team:", teams, index=team_idx)
-        st.session_state.current_team = team_name
+        team_name = st.selectbox(
+            "Choose a team:", 
+            teams, 
+            index=team_idx,
+            key=f"team_selector_{processor.df['Team'].nunique()}"
+        )
+        
+        # Update current team in session state and reset question when team changes
+        if st.session_state.current_team != team_name:
+            st.session_state.current_team = team_name
+            # Reset question selection when team changes
+            if 'current_question' in st.session_state:
+                del st.session_state.current_question
         
         st.subheader("Edit Score")
-        question_number = st.selectbox("Choose question number:", processor.question_numbers)
+        question_number = st.selectbox(
+            "Choose question number:", 
+            processor.question_numbers,
+            key="current_question"
+        )
         
+        # Get current score for the selected question
+        score_col = f"{question_number}_Score"
         current_score = float(processor.df.loc[
             processor.df['Team'] == team_name, 
-            f"{question_number}_Score"
+            score_col
         ].iloc[0])
         
+        # Use a unique key for the number_input that includes the question number
+        # This forces Streamlit to recreate the widget when the question changes
         new_score = st.number_input(
             "Enter new score:",
             min_value=0.0,
             max_value=processor.raw_score_per_question,
             value=current_score,
-            step=0.5
+            step=0.5,
+            key=f"score_input_{question_number}"
         )
         
         col3, col4 = st.columns(2)
