@@ -1,4 +1,4 @@
-**General Instructions**
+**Documentation Instructions**
 
 append and save to the file codechanges-log.md on the folder copilot_documents all major changes to the solution, add a timestamp on each entry
 
@@ -22,6 +22,8 @@ run a coverge addin while running tests
 after every new test passes add changed files to git and commit
 
 **Commit message generation instructions**
+
+undate the documentation instructions before commit
 
 before commiting always check for code duplication and delete duplicated code
 
