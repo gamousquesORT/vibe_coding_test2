@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from openpyxl.styles import PatternFill
 from typing import List, Dict, Set, Tuple, Optional
+from ui.score_change import ScoreChange
 
 class QuizProcessor:
     """Class for processing quiz data from Excel files."""
@@ -133,19 +134,25 @@ class QuizProcessor:
                    if col == f'Q{q} Adjusted Score')
             for q in self.question_numbers
         }
-        return raw_score_cols, adjusted_score_cols
-
-    def _highlight_changed_scores(self, worksheet, df: pd.DataFrame, current_team: str) -> None:
+        return raw_score_cols, adjusted_score_cols    
+    
+    def _highlight_changed_scores(self, worksheet, df: pd.DataFrame) -> None:
         """Apply highlighting to changed scores in worksheet."""
         if not self.changed_scores:
             return
             
         raw_score_cols, adjusted_score_cols = self._get_score_column_indices(df)
         
+        # Track current team for empty team name rows
+        current_team = None
         for row_idx, row in enumerate(df.to_dict('records'), 2):
-            team_name = row['Team Name'] or current_team
-            if team_name in self.changed_scores:
-                for q_num in self.changed_scores[team_name]:
+            # Update current team when we find a non-empty team name
+            if row['Team Name']:
+                current_team = row['Team Name']
+            
+            # Use current team name for highlighting all members
+            if current_team in self.changed_scores:
+                for q_num in self.changed_scores[current_team]:
                     for col_idx in [raw_score_cols[q_num], adjusted_score_cols[q_num]]:
                         worksheet.cell(row=row_idx, column=col_idx).fill = self.HIGHLIGHT_FILL
 
@@ -156,7 +163,7 @@ class QuizProcessor:
         with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
             df_output.to_excel(writer, index=False)
             worksheet = writer.sheets['Sheet1']
-            self._highlight_changed_scores(worksheet, df_output, df_output.iloc[-1]['Team Name'])
+            self._highlight_changed_scores(worksheet, df_output)
 
     @classmethod
     def create_output_excel(cls, results: List[Dict], question_numbers: List[int], 

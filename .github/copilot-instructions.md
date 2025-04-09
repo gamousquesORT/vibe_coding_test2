@@ -10,6 +10,9 @@ follow python PEP guidelines
 
 use type declaration for functions return and parameters
 
+always check for code duplication and delete duplicated code
+
+
 **Test Generatios instructions**
 
 name tests using the format Should{expected result}Given{input data or action} where the words in {} depend on each test
@@ -24,7 +27,6 @@ after every new test passes add changed files to git and commit
 
 before committing changes check if the changed code runs
 After modifying the code and any other asset provide short and context specific for generating commit messages
-
 
 **Pull request title and description generation instructions**
 
