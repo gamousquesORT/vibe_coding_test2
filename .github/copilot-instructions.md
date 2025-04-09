@@ -1,4 +1,4 @@
-**General Instructions**
+**Documentation Instructions**
 
 append and save to the file codechanges-log.md on the folder copilot_documents all major changes to the solution, add a timestamp on each entry
 
@@ -9,6 +9,7 @@ append and save the history of our chat to the chat-history.md file on the folde
 follow python PEP guidelines
 
 use type declaration for functions return and parameters
+
 
 **Test Generatios instructions**
 
@@ -22,9 +23,12 @@ after every new test passes add changed files to git and commit
 
 **Commit message generation instructions**
 
-before committing changes check if the changed code runs
-After modifying the code and any other asset provide short and context specific for generating commit messages
+undate the documentation instructions before commit
 
+before commiting always check for code duplication and delete duplicated code
+
+before committing changes check if the changed code runs
+After modifying the code and any other asset provide a short and context specific for generating commit messages
 
 **Pull request title and description generation instructions**
 
