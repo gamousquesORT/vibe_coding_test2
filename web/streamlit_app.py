@@ -2,6 +2,7 @@
 import streamlit as st
 from pathlib import Path
 import pandas as pd
+import streamlit.components.v1 as components
 
 # Add project root to Python path
 import sys
@@ -11,16 +12,77 @@ from quiz_processor import QuizProcessor
 from ui.score_change import ScoreChange
 
 
+def close_app():
+    """Close the Streamlit application by closing the browser tab."""
+    components.html(
+        """
+        <script>
+            window.close();
+        </script>
+        """,
+        height=0
+    )
+    st.stop()
+
+
 def initialize_session_state() -> None:
     """Initialize Streamlit session state variables."""
     defaults = {
         'processor': None,
         'score_changes': [],
-        'current_team': None
+        'current_team': None,
+        'should_close': False
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+
+def save_score_changes(processor: QuizProcessor) -> None:
+    """Save current score changes to a temporary file."""
+    if not st.session_state.score_changes:
+        st.warning("No changes to save")
+        return
+        
+    save_dir = Path("saved_changes")
+    save_dir.mkdir(exist_ok=True)
+    
+    # Create changes summary
+    changes_data = []
+    for change in st.session_state.score_changes:
+        changes_data.append({
+            "Team": change.team_name,
+            "Question": change.question_number,
+            "Original Score": change.old_score,
+            "New Score": change.new_score,
+            "Difference": change.difference
+        })
+    
+    # Save changes to Excel
+    changes_df = pd.DataFrame(changes_data)
+    timestamp = pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")
+    save_path = save_dir / f"score_changes_{timestamp}.xlsx"
+    
+    with pd.ExcelWriter(save_path, engine='openpyxl') as writer:
+        changes_df.to_excel(writer, index=False, sheet_name='Score Changes')
+        
+        # Also save current scores
+        teams_data = []
+        for team_name in sorted(processor.df['Team'].unique()):
+            team_data = processor.df[processor.df['Team'] == team_name].iloc[0]
+            row = {"Team": team_name}
+            for q_num in processor.question_numbers:
+                score_col = f"{q_num}_Score"
+                row[f"Q{q_num}"] = float(team_data[score_col])
+            teams_data.append(row)
+            
+        pd.DataFrame(teams_data).to_excel(
+            writer, 
+            index=False, 
+            sheet_name='Current Scores'
+        )
+    
+    st.success(f"Changes saved to {save_path}")
 
 
 def create_score_table(processor: QuizProcessor, team_data: pd.DataFrame) -> pd.DataFrame:
@@ -104,8 +166,14 @@ def edit_team_scores(processor: QuizProcessor) -> None:
             step=0.5
         )
         
-        if st.button("Update Score"):
-            handle_score_update(processor, team_name, question_number, new_score)
+        col3, col4 = st.columns(2)
+        with col3:
+            if st.button("Update Score"):
+                handle_score_update(processor, team_name, question_number, new_score)
+        
+        with col4:
+            if st.button("Save Changes"):
+                save_score_changes(processor)
     
     with col2:
         display_team_scores(processor, team_name)
@@ -201,6 +269,13 @@ def main() -> None:
     
     st.title("Quiz Score Processor")
     st.write("Process and edit quiz scores from Excel files.")
+    
+    # Add close button in the top right
+    with st.container():
+        col1, col2 = st.columns([6, 1])
+        with col2:
+            if st.button("Close App", type="primary"):
+                close_app()
     
     initialize_session_state()
     
